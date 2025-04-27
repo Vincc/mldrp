@@ -1,0 +1,224 @@
+\documentclass{beamer}
+\usetheme{Madrid}
+\usecolortheme{default}
+
+\title[SAE Interpretation]
+{Automatically Interpreting Millions of Features in Large Language Models}
+
+\subtitle{Machine Learning DRP Presentation}
+
+\author[TODO et al.]
+{TODO\inst{1} \and TODO\inst{2} \and TODO\inst{3} \and
+TODO \inst{4} \and TODO \inst{5}}
+
+\institute[UofT]
+{
+    \inst{1}Department of Computer Science\\
+    \inst{2}Department of Statistics\\
+    \inst{3}Department of Mathematics\\
+    \inst{4}Department of Electrical Engineering\\
+    \inst{5}Department of Cognitive Science\\
+    University of Toronto
+}
+
+\date[May 2025]
+{May 2025}
+
+\logo{\includegraphics[height=0.8cm]{logo_uoft}}
+
+\definecolor{uoftblue}{RGB}{6,41,88}
+\setbeamercolor{titlelike}{bg=uoftblue}
+\setbeamerfont{title}{series=\bfseries}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\begin{frame}
+\frametitle{Table of Contents}
+\tableofcontents
+\end{frame}
+
+\section{Introduction}
+\begin{frame}
+\frametitle{Core Challenge}
+\begin{itemize}
+    \item They describe LLMs as black boxes with \alert{billions} of uninterpretable features
+    \item Sparse Autoencoders (SAEs): 
+    \begin{itemize}
+        \item Transform dense activations → sparse latents
+        \item 1M+ features need interpretation
+    \end{itemize}
+    \item Manual analysis → \alert{impossible} at scale
+\end{itemize}
+
+\begin{block}{Paper's Goal/Contribution}
+\begin{itemize}
+    \item Automated process/pipeline for SAE latent interpretation
+    \item 5 new scoring metrics
+    \item Open-source code + 1M+ interpretations
+\end{itemize}
+\end{block}
+\end{frame}
+
+\section{Related Work}
+\begin{frame}
+\frametitle{Interpretability Evolution}
+\begin{itemize}
+    \item Neuron analysis (Olah et al. 2020):
+    \begin{itemize}
+        \item 70\% polysemantic neurons in GPT-2
+    \end{itemize}
+    
+    \item Linear Representation Hypothesis (Park et al. 2023):
+    \begin{itemize}
+        \item Concepts in linear combinations
+    \end{itemize}
+    
+    \item SAE's Use:
+    \begin{itemize}
+        \item 16k-131k latents in Gemma/GPT-4 (Cunningham et al. 2023)
+        \item 60\% reduction in polysemanticity
+    \end{itemize}
+\end{itemize}
+
+\begin{alertblock}{KEY DIFFERENCE!}
+\begin{itemize}
+    \item Existing methods are on avergae 83\% slower than SAE training
+    \item No standardized evaluation metrics
+\end{itemize} 
+\end{alertblock}
+\end{frame}
+
+\section{Pipeline: Collecting Activations}
+\begin{frame}
+\frametitle{Activation Patterns}
+\begin{itemize}
+    \item Used RedPajama-v2 as their dataset (10M tokens)
+    \item Batch size = 256 tokens (BOS initialized)
+    \item SAE Configurations:
+    \begin{itemize}
+        \item Gemma 2 9B: 16k/131k latents
+        \item Llama 3.1 8B: 262k latents
+    \end{itemize}
+    
+    \item Activation Stats:
+    \begin{itemize}
+        \item 131k SAE: 30\% latents <200 activations
+        \item 15\% completely inactive :(
+        \item 16k SAE: 10\% less than 200 activations
+    \end{itemize}
+\end{itemize}
+
+\begin{block}{Some Important Thinsg to Note}
+\begin{itemize}
+    \item Larger SAEs → more dataset-specific features
+    \item Training context length (1024) vs eval (256)
+\end{itemize}
+\end{block}
+\end{frame}
+
+\section{Pipeline: Generating Interpretations}
+\begin{frame}
+\frametitle{Automated Labeling (MAIN method proposed by the paper)}
+\begin{itemize}
+    \item LLM model for labeling is Llama 3.1 70B Instruct
+    \item Input is 40 activating examples/latent
+    \begin{itemize}
+        \item 32 tokens/example
+        \item Top activating tokens highlighted
+    \end{itemize}
+    
+    \item Sampling Strategies:
+    \begin{itemize}
+        \item ``Top" examples are high precision, low recall
+        \item ``Stratified" are broad but vague
+        \item ``Random" are at least 23\% worse accuracy
+    \end{itemize}
+    
+    \item Cost = \$200/1M latents
+\end{itemize}
+
+\begin{alertblock}{Limitations}
+\begin{itemize}
+    \item 32-token context → misses long-range patterns
+    \item Layer 1-8: 15\% lower accuracy
+\end{itemize}
+\end{alertblock}
+\end{frame}
+
+\section{Math Breakdown}
+\begin{frame}
+\frametitle{Core Equations}
+\begin{block}{SAE Objective}
+\[
+\mathcal{L} = \underbrace{\|\mathbf{W_d}(\mathbf{W_e x + b_e}) + \mathbf{b_d} - \mathbf{x}\|^2}_{\text{Reconstruction}} + \underbrace{\lambda\|\mathbf{h}\|_1}_{\text{Sparsity}}
+\]
+\end{block}
+
+\vspace{0.5cm}
+
+\begin{columns}
+\column{0.50\textwidth}
+\begin{block}{Detection Scoring}
+\[
+\text{Accuracy} = \frac{TP + TN}{TP + TN + FP + FN}
+\]
+\end{block}
+
+\begin{block}{Surprisal Scoring}
+\[
+\Delta S = \mathbb{E}[\log p(x|z) - \log p(x|\tilde{z})]
+\]
+\end{block}
+
+\hspace{0.5cm}
+
+\column{0.45\textwidth}
+\begin{block}{Intervention Scoring}
+\[
+\mathcal{S}(I,z) = \mathbb{E}_{x\sim\pi}[D_{KL}(p_{\text{C}} \| p_{\text{intervnd}})]
+\]
+\end{block}
+
+\begin{block}{Embedding Scoring}
+\[
+\text{Sim} = \cos(\mathbf{E}(z), \mathbf{E}(x_{\text{act}}))
+\]
+\end{block}
+\end{columns}
+\end{frame}
+
+\section{Evaluation}
+\begin{frame}
+\frametitle{Conclusion Summary}
+\begin{itemize}
+    \item 5 New Scoring Metrics:
+    \begin{itemize}
+        \item Detection, Fuzzing, Surprisal, Embedding, Intervention
+    \end{itemize}
+    
+    \item Important Results:
+    \begin{itemize}
+        \item Fuzzing: 0.69 correlation with human eval
+        \item Intervention: -0.37 correlation with context scores
+        \item Layer 32: 40\% higher scores than Layer 1
+    \end{itemize}
+    
+    \item Cost Analysis:
+    \begin{itemize}
+        \item Embedding: \$50/100k latents
+        \item Simulation: 30x more expensive
+    \end{itemize}
+\end{itemize}
+
+\begin{alertblock}
+{Conclusion Takeaways}
+\begin{itemize}
+    \item Automated interpretations help and enable SAE debugging!
+    \item Output features need causal metrics
+\end{itemize}
+\end{alertblock}
+\end{frame}
+
+\end{document}
