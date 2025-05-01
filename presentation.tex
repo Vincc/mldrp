@@ -42,7 +42,7 @@ TODO \inst{4} \and TODO \inst{5}}
 
 \section{Introduction}
 \begin{frame}
-\frametitle{Kiarash - Transformers}
+\frametitle{Introduction}
 \begin{itemize}
     \item They describe LLMs as black boxes with \alert{billions} of uninterpretable features
     \item Sparse Autoencoders (SAEs): 
@@ -61,6 +61,10 @@ TODO \inst{4} \and TODO \inst{5}}
 \end{itemize}
 \end{block}
 \end{frame}
+
+
+% MARIA STARTS HERE
+
 
 \section{Transformers}
 \begin{frame}
@@ -118,112 +122,88 @@ TODO \inst{4} \and TODO \inst{5}}
     \textbf{Mechanistic interpretability}: understanding the internal workings of AI models by identifiying the specific mechanisms driving their behaviour.
     Why study internal model representations?
     \begin{itemize}
-        \item Trust and safety: Transformers are "black boxes". Learning how knowledge is represented in them helps build trust.
+        \item Trust and safety: Transformers are ``black boxes". Learning how knowledge is represented in them helps build trust.
         \item Model debugging: Understanding attention patterns reveals how models prioritize features.
         \item Regulation compliance: Laws (like the EU AI Act) often require explanations for automated decisions. Interpretable transformers enable compliance in sectors like healthcare or finance.
     \end{itemize}
 \end{frame}
 
-\section{Pipeline: Collecting Activations}
-\begin{frame}
-\frametitle{Activation Patterns}
-\begin{itemize}
-    \item Used RedPajama-v2 as their dataset (10M tokens)
-    \item Batch size = 256 tokens (BOS initialized)
-    \item SAE Configurations:
-    \begin{itemize}
-        \item Gemma 2 9B: 16k/131k latents
-        \item Llama 3.1 8B: 262k latents
-    \end{itemize}
-    
-    \item Activation Stats:
-    \begin{itemize}
-        \item 131k SAE: 30\% latents <200 activations
-        \item 15\% completely inactive :(
-        \item 16k SAE: 10\% less than 200 activations
-    \end{itemize}
-\end{itemize}
+% KIARASH STARTS HERE
+\section{Sparse Autoencoders}
 
-\begin{block}{Some Important Thinsg to Note}
+\begin{frame}
+\frametitle{Sparse Autoencoders: Intuitive Introduction}
 \begin{itemize}
-    \item Larger SAEs → more dataset-specific features
-    \item Training context length (1024) vs eval (256)
+    \item Transformers are powerful but as previously mentioned, they act like ``black boxes" so we need to peek inside to understand them.
+    \item Sparse Autoencoders (SAEs) reveal key features the model uses by focusing on sparse and meaningful patterns in its activations.
+    \item Imagine a night before your exam you're trying to memorize the whole textbook. You might highlight key sentences and ignore the rest. This is similar to how SAEs work (please don't be like SAEs in real life, the question you think can't possibly appear on your exam \textit{may} still appear). I tend to be more like SAEs :)
 \end{itemize}
-\end{block}
 \end{frame}
 
-\section{Pipeline: Generating Interpretations}
 \begin{frame}
-\frametitle{Automated Labeling (MAIN method proposed by the paper)}
+\frametitle{Mathematical Formulation of SAEs}
 \begin{itemize}
-    \item LLM model for labeling is Llama 3.1 70B Instruct
-    \item Input is 40 activating examples/latent
-    \begin{itemize}
-        \item 32 tokens/example
-        \item Top activating tokens highlighted
-    \end{itemize}
-    
-    \item Sampling Strategies:
-    \begin{itemize}
-        \item ``Top" examples are high precision, low recall
-        \item ``Stratified" are broad but vague
-        \item ``Random" are at least 23\% worse accuracy
-    \end{itemize}
-    
-    \item Cost = \$200/1M latents
+    \item An SAE has two parts: an encoder and a decoder.
+    \item Encoder: Maps input $\mathbf{x} \in \mathbb{R}^n$ to a latent space $\mathbf{z} \in \mathbb{R}^m$ (where $m > n$).
+    \item Decoder: Reconstructs $\hat{\mathbf{x}} \in \mathbb{R}^n$ from $\mathbf{z}$.
+    \item Loss function:
+    \[
+    L = \| \mathbf{x} - \hat{\mathbf{x}} \|_2^2 + \lambda \| \mathbf{z} \|_1
+    \]
+    \item First term: Ensures $\hat{\mathbf{x}}$ matches $\mathbf{x}$ (reconstruction).
+    \item Second term: Enforces sparsity in $\mathbf{z}$ using the L1 norm, controlled by $\lambda$.
+    \item \textbf{Intuition: The SAE learns to represent the input with a few active features (sparse representation) while still being able to reconstruct the input.}
 \end{itemize}
-
-\begin{alertblock}{Limitations}
-\begin{itemize}
-    \item 32-token context → misses long-range patterns
-    \item Layer 1-8: 15\% lower accuracy
-\end{itemize}
-\end{alertblock}
 \end{frame}
 
-\section{Math Breakdown}
 \begin{frame}
-\frametitle{Core Equations}
-\begin{block}{SAE Objective}
-\[
-\mathcal{L} = \underbrace{\|\mathbf{W_d}(\mathbf{W_e x + b_e}) + \mathbf{b_d} - \mathbf{x}\|^2}_{\text{Reconstruction}} + \underbrace{\lambda\|\mathbf{h}\|_1}_{\text{Sparsity}}
-\]
-\end{block}
+\frametitle{Metrics for Analyzing SAEs}
+\begin{itemize}
+    \item \textbf{Reconstruction Error}: How well does the SAE rebuild the input? Measured with mean squared error (MSE). This is the first term in the loss function.
+    \item \textbf{Sparsity}: How few features are active? Often tracked with the L1 norm or count of non-zero elements. This is the second term in the loss function.
+    \item \textbf{Monosemanticity}: Do features represent single concepts? Assessed via correlation or human evaluation. This is a new metric introduced in the paper.
+    \item \textbf{Interpretability}: How well can we understand the features? This is the main focus of the paper.
+    \item The paper adds five new metrics for auto-interpretation (will be specified with paper details later).
 
-\vspace{0.5cm}
-
-\begin{columns}
-\column{0.50\textwidth}
-\begin{block}{Detection Scoring}
-\[
-\text{Accuracy} = \frac{TP + TN}{TP + TN + FP + FN}
-\]
-\end{block}
-
-\begin{block}{Surprisal Scoring}
-\[
-\Delta S = \mathbb{E}[\log p(x|z) - \log p(x|\tilde{z})]
-\]
-\end{block}
-
-\hspace{0.5cm}
-
-\column{0.45\textwidth}
-\begin{block}{Intervention Scoring}
-\[
-\mathcal{S}(I,z) = \mathbb{E}_{x\sim\pi}[D_{KL}(p_{\text{C}} \| p_{\text{intervnd}})]
-\]
-\end{block}
-
-\begin{block}{Embedding Scoring}
-\[
-\text{Sim} = \cos(\mathbf{E}(z), \mathbf{E}(x_{\text{act}}))
-\]
-\end{block}
-\end{columns}
+\end{itemize}
 \end{frame}
 
-\section{Evaluation}
+\begin{frame}
+\frametitle{Examples of Auto-Interpreted Latents}
+\begin{itemize}
+    \item In language models, SAEs might find features like ``dog," ``sarcasm," or ``positive sentiment."
+    \item In vision models, features could be ``red circles" or ``edges."
+    \item Paper: ``Rethinking Evaluation of Sparse Autoencoders" \textcolor{blue!80}{\href{https://www.researchgate.net/publication/387975553_Rethinking_Evaluation_of_Sparse_Autoencoders_through_the_Representation_of_Polysemous_Words}{[Source]}}
+\end{itemize}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.85\textwidth]{SAE3.png}
+    \caption{Example of SAE-identified features in an auto-interpretability pipeline.}
+\end{figure}
+\end{frame}
+
+\begin{frame}
+\frametitle{Automatically Interpreting Millions of Features}
+\begin{itemize}
+    \item Paper Title: ``Automatically Interpreting Millions of Features in Large Language Models."
+    \item Tackles interpreting SAEs at scale with:
+    \begin{itemize}
+        \item An automated pipeline to label SAE latents.
+        \item Five new scoring metrics to judge interpretation quality.
+        \item Open-source code and 1M+ feature interpretations.
+    \end{itemize}
+    \item Figure for the pipeline/results:
+\end{itemize}
+\begin{figure}
+    \centering
+        \includegraphics[width=0.5\textwidth]{SAE1.png}
+            \caption{Automated interpretation pipeline. \textcolor{blue!80}{\href{https://arxiv.org/pdf/2410.13928}{[Source]}}}
+        \end{figure}
+        \end{frame}
+
+% KIARASH ENDS HERE
+
+\section{Conclusion}
 \begin{frame}
 \frametitle{Conclusion Summary}
 \begin{itemize}
