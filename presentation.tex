@@ -1,9 +1,10 @@
 \documentclass{beamer}
+\usepackage{graphicx}
 \usetheme{Madrid}
 \usecolortheme{default}
 
 \title[SAE Interpretation]
-{Automatically Interpreting Millions of Features in Large Language Models}
+{DRP}
 
 \subtitle{Machine Learning DRP Presentation}
 
@@ -61,33 +62,66 @@ TODO \inst{4} \and TODO \inst{5}}
 \end{block}
 \end{frame}
 
-\section{Related Work}
+\section{Transformers}
 \begin{frame}
-\frametitle{Interpretability Evolution}
+\frametitle{Prerequisite Vocabulary: Transformers for Text Processing}
 \begin{itemize}
-    \item Neuron analysis (Olah et al. 2020):
+    \item \textbf{Tokens}: basic unit of text processed by transformers. Can be words, subwords, or characters.
+    \item \textbf{Embeddings}: map tokens to dense vectors in a high-dimensional space. These vectors capture semantic relationships: similar tokens (e.g., "king" and "queen") have similar vectors.
     \begin{itemize}
-        \item 70\% polysemantic neurons in GPT-2
+        \item Embeddings turn discrete tokens into continuous vectors, allowing mathematical operations (e.g., king - man + woman = queen).
     \end{itemize}
-    
-    \item Linear Representation Hypothesis (Park et al. 2023):
-    \begin{itemize}
-        \item Concepts in linear combinations
-    \end{itemize}
-    
-    \item SAE's Use:
-    \begin{itemize}
-        \item 16k-131k latents in Gemma/GPT-4 (Cunningham et al. 2023)
-        \item 60\% reduction in polysemanticity
-    \end{itemize}
+    \item \textbf{Positional encoding}: encoding the position of each token in a sentence with a sinusoidal function. Added to the embeddings. Allows the model to learn relative positions of tokens.
 \end{itemize}
+\end{frame}
 
-\begin{alertblock}{KEY DIFFERENCE!}
+\begin{frame}
+\frametitle{Attention is All You Need}
 \begin{itemize}
-    \item Existing methods are on avergae 83\% slower than SAE training
-    \item No standardized evaluation metrics
-\end{itemize} 
-\end{alertblock}
+    \item "Attention is All You Need" (Vaswani et al, 2017) introduced the Transformer architecture.
+    \item Attention is a mathematical function defined as:\\
+    $ \text{Attention}(Q, K, V) = \text{softmax}\left( \frac{QK^\top}{\sqrt{d_k}} \right) V $, where
+    \begin{itemize}
+        \item $Q$: Queries matrix. Identifies what a token seeks.
+        \item $K$: Keys matrix. Identifies what a token offers.
+        \item $V$: Values matrix. Carries the actual information to aggregate based on attention weights
+        \item $d_k$: Dimension of keys (scaling prevents gradient saturation)
+    \end{itemize}
+    \item $Q, K, V$: learned projections 
+    \item Each query vector $q_i$ computes cosine similarity with all keys $k_j$, creating attention weights that linearly combine value vectors $v_j$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Transformer Architecture}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{transformer.png}
+    \caption{Transformer architecture.}
+    \label{fig:transformer}
+\end{figure}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Attention is All You Need}
+    \begin{itemize}
+    \item Instead of one attention function, transformers use h=8 parallel heads:\\
+        $MultiHead(Q, K, V) = MultiHead(XW_i^Q, XW_i^K, XW_i^V) = Concat(head_1, \dots, head_k)W^0$
+    \item Each head applies attention to linearly projected versions of $Q, K, V$:\\
+        $head_i = Attention(XW_i^Q, XW_i^K, XW_i^V)$, where $W_i^Q, W_i^K, W_i^V$ are learnable projection matrices.
+    \item Each head learns a unique 'lens' to focus on different relationships (e.g., syntax vs. semantics).
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Our project: Interpretability}
+    \textbf{Mechanistic interpretability}: understanding the internal workings of AI models by identifiying the specific mechanisms driving their behaviour.
+    Why study internal model representations?
+    \begin{itemize}
+        \item Trust and safety: Transformers are "black boxes". Learning how knowledge is represented in them helps build trust.
+        \item Model debugging: Understanding attention patterns reveals how models prioritize features.
+        \item Regulation compliance: Laws (like the EU AI Act) often require explanations for automated decisions. Interpretable transformers enable compliance in sectors like healthcare or finance.
+    \end{itemize}
 \end{frame}
 
 \section{Pipeline: Collecting Activations}
