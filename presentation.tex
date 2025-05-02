@@ -4,11 +4,9 @@
 \usecolortheme{default}
 
 \title[SAE Interpretation]
-{DRP}
+{Interpreting Internal Representations of Transformer Models}
 
-\subtitle{Machine Learning DRP Presentation}
-
-\author[TODO et al.]
+\author[Daniel, Kiarash, Maria, Vincent]
 {TODO\inst{1} \and TODO\inst{2} \and TODO\inst{3} \and
 TODO \inst{4} \and TODO \inst{5}}
 
@@ -18,7 +16,6 @@ TODO \inst{4} \and TODO \inst{5}}
     \inst{2}Department of Statistics\\
     \inst{3}Department of Mathematics\\
     \inst{4}Department of Electrical Engineering\\
-    \inst{5}Department of Cognitive Science\\
     University of Toronto
 }
 
@@ -41,6 +38,14 @@ TODO \inst{4} \and TODO \inst{5}}
 \end{frame}
 
 \section{Introduction}
+\begin{frame}
+
+\end{frame}
+
+\begin{frame}
+
+\end{frame}
+
 \begin{frame}
 \frametitle{Introduction}
 \begin{itemize}
@@ -82,9 +87,9 @@ TODO \inst{4} \and TODO \inst{5}}
 \begin{frame}
 \frametitle{Attention is All You Need}
 \begin{itemize}
-    \item "Attention is All You Need" (Vaswani et al, 2017) introduced the Transformer architecture.
+    \item ``Attention is All You Need'' \cite{vaswani2023attentionneed} introduced the Transformer architecture.
     \item Attention is a mathematical function defined as:\\
-    $ \text{Attention}(Q, K, V) = \text{softmax}\left( \frac{QK^\top}{\sqrt{d_k}} \right) V $, where
+    $ \operatorname{Attention}(Q, K, V) = \operatorname{Softmax}\left( \frac{QK^\top}{\sqrt{d_k}} \right) V $, where
     \begin{itemize}
         \item $Q$: Queries matrix. Identifies what a token seeks.
         \item $K$: Keys matrix. Identifies what a token offers.
@@ -110,9 +115,9 @@ TODO \inst{4} \and TODO \inst{5}}
     \frametitle{Attention is All You Need}
     \begin{itemize}
     \item Instead of one attention function, transformers use h=8 parallel heads:\\
-        $MultiHead(Q, K, V) = MultiHead(XW_i^Q, XW_i^K, XW_i^V) = Concat(head_1, \dots, head_k)W^0$
+        $\operatorname{MultiHead}(Q, K, V) = \operatorname{MultiHead}(XW_i^Q, XW_i^K, XW_i^V) = \operatorname{Concat}(head_1, \dots, head_k)W^0$
     \item Each head applies attention to linearly projected versions of $Q, K, V$:\\
-        $head_i = Attention(XW_i^Q, XW_i^K, XW_i^V)$, where $W_i^Q, W_i^K, W_i^V$ are learnable projection matrices.
+        $head_i = \operatorname{Attention}(XW_i^Q, XW_i^K, XW_i^V)$, where $W_i^Q, W_i^K, W_i^V$ are learnable projection matrices.
     \item Each head learns a unique 'lens' to focus on different relationships (e.g., syntax vs. semantics).
     \end{itemize}
 \end{frame}
@@ -185,7 +190,7 @@ TODO \inst{4} \and TODO \inst{5}}
 \begin{frame}
 \frametitle{Automatically Interpreting Millions of Features}
 \begin{itemize}
-    \item Paper Title: ``Automatically Interpreting Millions of Features in Large Language Models."
+    \item Paper Title: ``Automatically Interpreting Millions of Features in Large Language Models."  \cite{paulo2024automaticallyinterpretingmillionsfeatures}
     \item Tackles interpreting SAEs at scale with:
     \begin{itemize}
         \item An automated pipeline to label SAE latents.
@@ -233,6 +238,18 @@ TODO \inst{4} \and TODO \inst{5}}
     \item Output features need causal metrics
 \end{itemize}
 \end{alertblock}
+\end{frame}
+
+\begin{frame}
+\frametitle{SAEs can Interpret Randomly Initialized Transformers}
+From: \cite{heap2025sparseautoencodersinterpretrandomly}
+\end{frame}
+
+
+\begin{frame}{References}
+    \footnotesize
+    \bibliography{reference.bib}
+    \bibliographystyle{apalike}
 \end{frame}
 
 \end{document}
