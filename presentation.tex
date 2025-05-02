@@ -80,10 +80,10 @@ and many other applied fields, such as health, engineering, etc.
     \begin{itemize}
         \item $Q$: Queries matrix. Identifies what a token seeks.
         \item $K$: Keys matrix. Identifies what a token offers.
-        \item $V$: Values matrix. Carries the actual information to aggregate based on attention weights
-        \item $d_k$: Dimension of keys (scaling prevents gradient saturation)
+        \item $V$: Values matrix. Carries the actual information to aggregate based on attention weights.
+        \item $d_k$: Dimension of keys (scaling prevents gradient saturation).
     \end{itemize}
-    \item $Q, K, V$: learned projections 
+    \item $Q, K, V$: learned projections.
     \item Each query vector $q_i$ computes cosine similarity with all keys $k_j$, creating attention weights that linearly combine value vectors $v_j$.
 \end{itemize}
 \end{frame}
