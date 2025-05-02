@@ -39,37 +39,25 @@ TODO \inst{4} \and TODO \inst{5}}
 
 \section{Introduction}
 \begin{frame}
-
+\frametitle{Deep Learning}
+Since 2012, deep learning architectures have achieved notable achievements in the following fields:
+\begin{enumerate}
+\item Computer vision: object detection, image classification, segmentation
+\item Natural language processing: large language models (wChatGPT, Claude, DeepSeek, etc.), machine translation, coding, math
+\item Reinforcement learning: robotics, self-driving cars
+\end{enumerate}
+and many other applied fields, such as health, engineering, etc.
 \end{frame}
-
-\begin{frame}
-
-\end{frame}
-
 \begin{frame}
 \frametitle{Introduction}
-\begin{itemize}
-    \item They describe LLMs as black boxes with \alert{billions} of uninterpretable features
-    \item Sparse Autoencoders (SAEs): 
-    \begin{itemize}
-        \item Transform dense activations → sparse latents
-        \item 1M+ features need interpretation
-    \end{itemize}
-    \item Manual analysis → \alert{impossible} at scale
-\end{itemize}
-
-\begin{block}{Paper's Goal/Contribution}
-\begin{itemize}
-    \item Automated process/pipeline for SAE latent interpretation
-    \item 5 new scoring metrics
-    \item Open-source code + 1M+ interpretations
-\end{itemize}
-\end{block}
+\begin{enumerate}
+\item Despite these successes, little is known about \textit{how} deep learning models actually process and represent input data
+\item We will examine how input data changes as it flows through a model, focusing on the setting of natural language processing
+\item Better interpreting how these models work would potentially help us develop safer, more efficient models, and may yield insights into other fields (as many advancements in deep learning already have) such as linguistics, cognitive science, and philosophy. 
+\end{enumerate}
 \end{frame}
 
-
 % MARIA STARTS HERE
-
 
 \section{Transformers}
 \begin{frame}
