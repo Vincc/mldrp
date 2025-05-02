@@ -63,7 +63,7 @@ and many other applied fields, such as health, engineering, etc.
 \frametitle{Prerequisite Vocabulary: Transformers for Text Processing}
 \begin{itemize}
     \item \textbf{Tokens}: basic unit of text processed by transformers. Can be words, subwords, or characters.
-    \item \textbf{Embeddings}: map tokens to dense vectors in a high-dimensional space. These vectors capture semantic relationships: similar tokens (e.g., "king" and "queen") have similar vectors.
+    \item \textbf{Embeddings}: map tokens to dense vectors in a high-dimensional space. These vectors capture semantic relationships: similar tokens (e.g., ``king'' and ``queen'') have similar vectors.
     \begin{itemize}
         \item Embeddings turn discrete tokens into continuous vectors, allowing mathematical operations (e.g., $\text{king} - \text{man} + \text{woman} = \text{queen}$).
     \end{itemize}
@@ -102,9 +102,9 @@ and many other applied fields, such as health, engineering, etc.
     \frametitle{Attention is All You Need}
     \begin{itemize}
     \item Instead of one attention function, transformers use $h=8$ parallel heads:\\
-        \begin{align*}\operatorname{MultiHead}(Q, K, V) &= \operatorname{MultiHead}(XW_i^Q, XW_i^K, XW_i^V)\\ &= \operatorname{Concat}(head_1, \dots, head_k)W^0\end{align*}
+        \begin{align*}\operatorname{MultiHead}(Q, K, V) &= \operatorname{MultiHead}(XW_i^Q, XW_i^K, XW_i^V)\\ &= \operatorname{Concat}(\text{head}_1, \dots, \text{head}_k)W^0\end{align*}
     \item Each head applies attention to linearly projected versions of $Q, K, V$:\\
-        $head_i = \operatorname{Attention}(XW_i^Q, XW_i^K, XW_i^V)$, where $W_i^Q, W_i^K, W_i^V$ are learnable projection matrices.
+        $\text{head}_i = \operatorname{Attention}(XW_i^Q, XW_i^K, XW_i^V)$, where $W_i^Q, W_i^K, W_i^V$ are learnable projection matrices.
     \item Each head learns a unique 'lens' to focus on different relationships (e.g., syntax vs. semantics).
     \end{itemize}
 \end{frame}
@@ -136,7 +136,7 @@ and many other applied fields, such as health, engineering, etc.
 \frametitle{Mathematical Formulation of SAEs}
 \begin{itemize}
     \item An SAE has two parts: an encoder and a decoder.
-    \item Encoder: Maps input $\mathbf{x} \in \mathbb{R}^n$ to a latent space $\mathbf{z} \in \mathbb{R}^m$ (where $m > n$).
+    \item Encoder: Maps input $\mathbf{x} \in \mathbb{R}^n$ to a latent space $\mathbf{z} \in \mathbb{R}^m$ (where $m \gg n$).
     \item Decoder: Reconstructs $\hat{\mathbf{x}} \in \mathbb{R}^n$ from $\mathbf{z}$.
     \item Loss function:
     \[
